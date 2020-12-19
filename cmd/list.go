@@ -3,8 +3,10 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/cvngur/gotodo/db"
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -21,9 +23,17 @@ var listCmd = &cobra.Command{
 			fmt.Println("You have no tasks")
 			return
 		}
-		fmt.Println("You have the following tasks:")
+		fmt.Println("You have the following tasks:\n")
 		for i, task := range tasks {
-			fmt.Printf("%d. %s.\n", i+1, task.Value)
+			if !strings.HasPrefix(task.Value, "[✓]") {
+				fmt.Printf("%d. %s.\n", i+1, task.Value)
+			}
+		}
+		fmt.Println("\nCompleted tasks:\n")
+		for j, task := range tasks {
+			if strings.HasPrefix(task.Value, "[✓]") {
+				color.Green("%d. %s.\n", j+1, task.Value)
+			}
 		}
 	},
 }
