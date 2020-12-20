@@ -14,6 +14,7 @@ var listCmd = &cobra.Command{
 	Short: "Lists tasks in your task list",
 	Run: func(cmd *cobra.Command, args []string) {
 		tasks, err := db.AllTasks()
+		var doneTasks []string
 		if err != nil {
 			fmt.Println("Something went wrong")
 			os.Exit(1)
@@ -22,27 +23,26 @@ var listCmd = &cobra.Command{
 			fmt.Println("You have no tasks")
 			return
 		}
-		fmt.Println("You have the following tasks:\n")
+		fmt.Print("You have the following tasks:\n\n")
 		for i, task := range tasks {
-			isDone := task.Value.IsDone
-			line := fmt.Sprintf("%d. %s.\n", i+1, task.Value.Text)
-			tag := task.Value.Tag
-			if !isDone {
-				if tag == "important" {
+			task := task.Value
+			line := fmt.Sprintf("%d. %s.\n", i+1, task.Text)
+
+			if !task.IsDone {
+				if task.Tag == "important" {
 					color.Red(line)
-				} else if tag == "today" {
+				} else if task.Tag == "today" {
 					color.Yellow(line)
 				} else {
 					fmt.Printf(line)
 				}
+			} else {
+				doneTasks = append(doneTasks, task.Text)
 			}
 		}
-		fmt.Println("\nCompleted tasks:\n")
-		for j, task := range tasks {
-			isDone := task.Value.IsDone
-			if isDone {
-				color.Green("%d. %s.\n", j+1, task.Value.Text)
-			}
+		fmt.Print("\nCompleted tasks:\n\n")
+		for j, task := range doneTasks {
+			color.Green("%d. %s.\n", j+1, task)
 		}
 	},
 }
