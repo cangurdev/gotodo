@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/cvngur/gotodo/db"
 	"github.com/fatih/color"
@@ -25,14 +24,24 @@ var listCmd = &cobra.Command{
 		}
 		fmt.Println("You have the following tasks:\n")
 		for i, task := range tasks {
-			if !strings.HasPrefix(task.Value, "[✓]") {
-				fmt.Printf("%d. %s.\n", i+1, task.Value)
+			isDone := task.Value.IsDone
+			line := fmt.Sprintf("%d. %s.\n", i+1, task.Value.Text)
+			tag := task.Value.Tag
+			if !isDone {
+				if tag == "important" {
+					color.Red(line)
+				} else if tag == "today" {
+					color.Yellow(line)
+				} else {
+					fmt.Printf(line)
+				}
 			}
 		}
 		fmt.Println("\nCompleted tasks:\n")
 		for j, task := range tasks {
-			if strings.HasPrefix(task.Value, "[✓]") {
-				color.Green("%d. %s.\n", j+1, task.Value)
+			isDone := task.Value.IsDone
+			if isDone {
+				color.Green("%d. %s.\n", j+1, task.Value.Text)
 			}
 		}
 	},

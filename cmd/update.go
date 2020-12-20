@@ -30,7 +30,7 @@ var updateCmd = &cobra.Command{
 			os.Exit(1)
 		}
 		task := tasks[key-1]
-		newTask := strings.Join(args[1:len(args)], " ")
+		newTask := strings.Join(args[1:], " ")
 
 		err = db.UpdateTask(task.Key, newTask)
 		if err != nil {
