@@ -17,11 +17,8 @@ var addCmd = &cobra.Command{
 		due, _ := cmd.Flags().GetString("due")
 		parent, _ := cmd.Flags().GetString("folder")
 		task := strings.Join(args, " ")
-		tag := ""
-		if importanTag {
-			tag = "important"
-		}
-		err := db.CreateTask(task, tag, due, parent)
+
+		err := db.CreateTask(task, due, parent, importanTag)
 		if err != nil {
 			fmt.Println("Something went wrong:", err)
 		}

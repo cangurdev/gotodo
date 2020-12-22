@@ -17,11 +17,11 @@ type Task struct {
 	Value Content
 }
 type Content struct {
-	IsDone bool   `json:"IsDone"`
-	Parent string `json:"Parent"`
-	Text   string `json:"Text"`
-	Tag    string `json:"Tag"`
-	Due    string `json:"Due"`
+	IsDone      bool   `json:"IsDone"`
+	Parent      string `json:"Parent"`
+	Text        string `json:"Text"`
+	IsImportant bool   `json:"IsImportant"`
+	Due         string `json:"Due"`
 }
 
 func Init(dbPath string) error {
@@ -36,13 +36,14 @@ func Init(dbPath string) error {
 	})
 }
 
-func CreateTask(task, tag, due, parent string) error {
+//CreateTask add the task to the bucket
+func CreateTask(task, due, parent string, isImportant bool) error {
 
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(taskBucket)
 		id64, _ := b.NextSequence()
 		key := itob(int(id64))
-		config := &Content{false, parent, task, tag, due}
+		config := &Content{false, parent, task, isImportant, due}
 		dataBytes, _ := json.Marshal(config)
 		return b.Put(key, dataBytes)
 	})
@@ -51,6 +52,8 @@ func CreateTask(task, tag, due, parent string) error {
 	}
 	return nil
 }
+
+//UpdateTask updates the task
 func UpdateTask(key int, task string) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(taskBucket)
@@ -63,6 +66,7 @@ func UpdateTask(key int, task string) error {
 	})
 }
 
+//AllTasks returns all tasks in the bucket
 func AllTasks() ([]Task, error) {
 	var tasks []Task
 	var doneTasks []Task
@@ -92,6 +96,7 @@ func AllTasks() ([]Task, error) {
 	return tasks, nil
 }
 
+//DeleteTask removes the task from bucket
 func DeleteTask(key int) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(taskBucket)
@@ -99,7 +104,8 @@ func DeleteTask(key int) error {
 	})
 }
 
-func DoneTask(key int) error {
+//DoTask makes true isDone property of task that given key
+func DoTask(key int) error {
 	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(taskBucket)
 		v := b.Get(itob(key))
@@ -128,7 +134,7 @@ func unmarshall(v []byte) Content {
 	var data Content
 	err := json.Unmarshal(v, &data)
 	if err != nil {
-		fmt.Println("kawga")
+		fmt.Println("kawga", err)
 	}
 	return data
 }

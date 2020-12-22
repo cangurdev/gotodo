@@ -29,13 +29,13 @@ var listCmd = &cobra.Command{
 			line := fmt.Sprintf("%d\t%v\t%s\t%s\t%s\n", i+1, task.IsDone, task.Due, task.Parent, task.Text)
 
 			if !task.IsDone {
-				if task.Tag == "important" {
+				if task.IsImportant {
 					color.Red(line)
 				} else {
 					fmt.Printf(line)
 				}
 			} else {
-				color.Green("%d.\t%v\t%s\t%s\t%s\n", i+1, task.IsDone, task.Due, task.Parent, task.Text)
+				color.Green(line)
 			}
 		}
 	},
