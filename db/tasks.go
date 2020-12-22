@@ -21,6 +21,7 @@ type Content struct {
 	Parent string `json:"Parent"`
 	Text   string `json:"Text"`
 	Tag    string `json:"Tag"`
+	Due    string `json:"Due"`
 }
 
 func Init(dbPath string) error {
@@ -35,13 +36,13 @@ func Init(dbPath string) error {
 	})
 }
 
-func CreateTask(task, tag string) error {
+func CreateTask(task, tag, due, parent string) error {
 
 	err := db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(taskBucket)
 		id64, _ := b.NextSequence()
 		key := itob(int(id64))
-		config := &Content{false, "main", task, tag}
+		config := &Content{false, parent, task, tag, due}
 		dataBytes, _ := json.Marshal(config)
 		return b.Put(key, dataBytes)
 	})
@@ -64,16 +65,25 @@ func UpdateTask(key int, task string) error {
 
 func AllTasks() ([]Task, error) {
 	var tasks []Task
+	var doneTasks []Task
 	err := db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket(taskBucket)
 		c := b.Cursor()
 		for k, v := c.First(); k != nil; k, v = c.Next() {
 			content := unmarshall(v)
-			tasks = append(tasks, Task{
-				Key:   btoi(k),
-				Value: content,
-			})
+			if content.IsDone {
+				doneTasks = append(doneTasks, Task{
+					Key:   btoi(k),
+					Value: content,
+				})
+			} else {
+				tasks = append(tasks, Task{
+					Key:   btoi(k),
+					Value: content,
+				})
+			}
 		}
+		tasks = append(tasks, doneTasks...)
 		return nil
 	})
 	if err != nil {

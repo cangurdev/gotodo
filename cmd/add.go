@@ -9,20 +9,19 @@ import (
 )
 
 var addCmd = &cobra.Command{
-	Use:              "add [OPTIONS]",
+	Use:              "add",
 	TraverseChildren: true,
 	Short:            "Adds a task to your task list",
 	Run: func(cmd *cobra.Command, args []string) {
 		importanTag, _ := cmd.Flags().GetBool("important")
-		todayTag, _ := cmd.Flags().GetBool("today")
+		due, _ := cmd.Flags().GetString("due")
+		parent, _ := cmd.Flags().GetString("folder")
 		task := strings.Join(args, " ")
 		tag := ""
 		if importanTag {
 			tag = "important"
-		} else if todayTag {
-			tag = "today"
 		}
-		err := db.CreateTask(task, tag)
+		err := db.CreateTask(task, tag, due, parent)
 		if err != nil {
 			fmt.Println("Something went wrong:", err)
 		}
@@ -33,5 +32,6 @@ var addCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(addCmd)
 	addCmd.Flags().BoolP("important", "i", false, "Important task")
-	addCmd.Flags().BoolP("today", "t", false, "Task should done today")
+	addCmd.Flags().StringP("due", "d", "-", "Due time of the task")
+	addCmd.Flags().StringP("folder", "f", "-", "Parent folder of the task")
 }
