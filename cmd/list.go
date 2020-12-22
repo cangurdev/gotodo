@@ -10,10 +10,19 @@ import (
 )
 
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Lists tasks in your task list",
+	Use:              "list",
+	TraverseChildren: true,
+	Short:            "Lists tasks in your task list",
 	Run: func(cmd *cobra.Command, args []string) {
-		tasks, err := db.AllTasks()
+
+		filter, _ := cmd.Flags().GetString("filter")
+		var tasks []db.Task
+		var err error
+		if filter != "" {
+			tasks, err = db.FilteredTasks(filter)
+		} else {
+			tasks, err = db.AllTasks()
+		}
 		if err != nil {
 			fmt.Println("Something went wrong")
 			os.Exit(1)
@@ -43,4 +52,5 @@ var listCmd = &cobra.Command{
 
 func init() {
 	RootCmd.AddCommand(listCmd)
+	listCmd.Flags().StringP("filter", "f", "", "Filters parent folders")
 }

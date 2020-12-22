@@ -96,6 +96,38 @@ func AllTasks() ([]Task, error) {
 	return tasks, nil
 }
 
+//FilteredTasks returns filtered tasks
+func FilteredTasks(filter string) ([]Task, error) {
+	var tasks []Task
+	var doneTasks []Task
+	err := db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(taskBucket)
+		c := b.Cursor()
+		for k, v := c.First(); k != nil; k, v = c.Next() {
+			content := unmarshall(v)
+			if content.Parent == filter {
+				if content.IsDone {
+					doneTasks = append(doneTasks, Task{
+						Key:   btoi(k),
+						Value: content,
+					})
+				} else {
+					tasks = append(tasks, Task{
+						Key:   btoi(k),
+						Value: content,
+					})
+				}
+			}
+		}
+		tasks = append(tasks, doneTasks...)
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return tasks, nil
+}
+
 //DeleteTask removes the task from bucket
 func DeleteTask(key int) error {
 	return db.Update(func(tx *bolt.Tx) error {

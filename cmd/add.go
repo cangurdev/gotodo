@@ -15,7 +15,7 @@ var addCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		importanTag, _ := cmd.Flags().GetBool("important")
 		due, _ := cmd.Flags().GetString("due")
-		parent, _ := cmd.Flags().GetString("folder")
+		parent, _ := cmd.Flags().GetString("parent")
 		task := strings.Join(args, " ")
 
 		err := db.CreateTask(task, due, parent, importanTag)
@@ -30,5 +30,5 @@ func init() {
 	RootCmd.AddCommand(addCmd)
 	addCmd.Flags().BoolP("important", "i", false, "Important task")
 	addCmd.Flags().StringP("due", "d", "-", "Due time of the task")
-	addCmd.Flags().StringP("folder", "f", "-", "Parent folder of the task")
+	addCmd.Flags().StringP("parent", "p", "-", "Parent folder of the task")
 }
